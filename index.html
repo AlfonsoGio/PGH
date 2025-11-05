@@ -23,7 +23,7 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Softer, larger shadow */
     margin-bottom: 0px;
     position: relative; 
-    border-top: 10px solid #601717; /* Accent color bar */
+    border-top: 10px solid #0a4627; /* Accent color bar */
     font-size: 25px;
 }
 /* New container for the form header and PDF button */
@@ -236,6 +236,34 @@ button:hover {
     margin-top: 0px;
 }
 
+/* Added CSS for the new header structure */
+#title-logo-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Spacing below the title bar */
+    padding-top: 10px; /* Space from the top red border */
+}
+
+#title-logo-wrapper h2 {
+    /* Override any inherited H2 margin/padding that might clash with flex alignment */
+    margin: 0; 
+    padding: 0;
+    /* Re-apply font size lost from the original h2 styling being too broad */
+    font-size: 24px;
+}
+
+#logo-placeholder {
+    /* REMOVED: Placeholder styles */
+    display: none; /* Hide the placeholder div */
+}
+#logo-image {
+    width: 50px; /* Set desired width */
+    height: 50px; /* Set desired height (1:1 ratio) */
+    object-fit: contain; /* Ensures the image fits within the bounds without cropping */
+    flex-shrink: 0;
+    margin-right: 0px;
+}
+/* End new title bar styles */
 
 /* --- Form Container (Screen View) - FIX APPLIED HERE --- */
 #form-previews {
@@ -444,7 +472,69 @@ button:hover {
 .tube-color-SPECIMEN-CUP { color: #f89c00 !important; } /* Yellow-Orange/Amber */
 .tube-color-BROWN { color: #795548 !important; } /* Brown for BCS Bottles */
 
+/* --- NEW TOGGLE SWITCH CSS --- */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
 
+.toggle-switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #dc3545; /* Red (Off State) */
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "OFF";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 26px;
+  color: #dc3545;
+}
+
+input:checked + .slider {
+  background-color: #28a745; /* Green (On State) */
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+  content: "ER";
+  color: #28a745;
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
 /* --------------------------------------------------------------------- */
 /* --- RESPONSIVE WEB DESIGN (RWD) STYLES --- */
 /* --------------------------------------------------------------------- */
@@ -467,17 +557,27 @@ button:hover {
         padding: 15px;
     }
 
-    /* Adjust collector input to full width */
+    /* Adjust collector control to full width and stack inputs vertically */
     #collector-control {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        gap: 10px; /* Spacing between the three control groups */
+    }
+    #collector-control > div {
+        width: 100%; /* Ensure inner divs take full width */
     }
     #collector-control input {
-        width: 100%;
-        margin-top: 5px;
-        margin-left: 0 !important;
-        box-sizing: border-box; /* Ensure padding/border doesn't overflow */
+        flex-grow: 1;
+        margin-left: 5px !important;
+    }
+    #collector-input {
+         width: 100% !important;
+         max-width: 200px;
+    }
+    #time-collected-input {
+         width: 100% !important;
+         max-width: 120px;
     }
 
     /* Stack the Materials and Reminders boxes */
@@ -596,12 +696,39 @@ button:hover {
         <div id="global-font-setter-container">
         </div>
 
-        <h2><span style="color: #007bff;"></span> PGH Laboratory Request Form</h2>
+            <!-- NEW: Wrapper for H2 and Logo --><div id="title-logo-wrapper">
+                <img id="logo-image" src="logo.png" alt="PGH Logo">
+            <h2><span style="color: #007bff; margin-left:10px"></span> PGH Laboratory Request Form</h2>
+
+            <!-- Replaced placeholder with actual image -->
+
+        </div>
         
-        <!-- NEW COLLECTED BY INPUT FIELD -->
-        <div id="collector-control" style="margin-bottom: 0px; padding: 10px; border: 0px solid #ddd; border-radius: 8px; background-color: #ffffff; width:50%;">
-            <label for="collector-input" style="font-weight: bold; color: #333; font-size: 18px;">Collected By:</label>
-            <input type="text" id="collector-input" value="CLK SA" style="width: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px; font-size: 15px;">
+        <!-- NEW COLLECTED BY, TIME, AND ER TOGGLE INPUT FIELDS -->
+        <div id="collector-control" style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background-color: #f5f5f5;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                
+                <!-- Collected By (Persisted) -->
+                <div style="display: flex; align-items: center;">
+                    <label for="collector-input" style="font-weight: bold; color: #333; font-size: 18px; white-space: nowrap;">Collected By:</label>
+                    <input type="text" id="collector-input" value="CLK SA" style="width: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px; font-size: 15px;">
+                </div>
+
+                <!-- Time Collected (Manual Override, NON-PERSISTENT) -->
+                <div style="display: flex; align-items: center;">
+                    <label for="time-collected-input" style="font-weight: bold; color: #333; font-size: 18px; white-space: nowrap;">Time Collected:</label>
+                    <input type="text" id="time-collected-input" placeholder="HH:MM am/pm" style="width: 120px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px; font-size: 15px;">
+                </div>
+                
+                <!-- ER Toggle Switch (Persisted) -->
+                <div style="display: flex; align-items: center;">
+                    <span style="font-weight: bold; color: #333; font-size: 18px; margin-right: 10px; white-space: nowrap;">ER:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="er-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
         </div>
         
         <div class="input-container-group">
@@ -1063,6 +1190,44 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
             1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'Sa', 0: 'Su'
         };
 
+        // --- NEW CONFIGURATION/STORAGE FUNCTIONS ---
+
+        /**
+         * Saves the current state of persistent custom control inputs (Collected By, ER Toggle) to localStorage.
+         * Time Override is intentionally excluded from saving.
+         */
+        function saveSettings() {
+            const collector = document.getElementById('collector-input').value.trim();
+            const isEr = document.getElementById('er-toggle').checked;
+            // Time override value is intentionally NOT retrieved or saved here.
+
+            localStorage.setItem('pgh_collector_name', collector);
+            localStorage.setItem('pgh_er_override', isEr);
+        }
+
+        /**
+         * Loads the saved state of persistent custom control inputs from localStorage on page load.
+         * Time Override is intentionally excluded from loading.
+         */
+        function loadSettings() {
+            const collectorInput = document.getElementById('collector-input');
+            const erToggle = document.getElementById('er-toggle');
+            const timeInput = document.getElementById('time-collected-input');
+
+            // 1. Load Collected By (default to CLK SA if not found)
+            const storedCollector = localStorage.getItem('pgh_collector_name');
+            if (storedCollector) {
+                collectorInput.value = storedCollector;
+            }
+
+            // 2. Load ER Toggle State (default to false)
+            const storedEr = localStorage.getItem('pgh_er_override');
+            erToggle.checked = storedEr === 'true'; 
+            
+            // 3. Time Override is intentionally left blank (non-persistent)
+            timeInput.value = '';
+        }
+
         // --- UTILITY FUNCTIONS ---
         
         /**
@@ -1122,7 +1287,7 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
          * @param {number} baseFontSize The desired font size before shrinking.
          */
         function shrinkToFit(element, baseFontSize) {
-            const minFontSize = 10;     
+            const minFontSize = 10;      
             let currentFontSize = baseFontSize;
             const config = getConfigForElement(element);
             const isMultiLine = config && config.isMultiLine;
@@ -1319,6 +1484,7 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
 
             // --- New: Dynamic Date and Collector Value ---
             const dynamicDate = getCurrentDateMMDD();
+            // We use the current value of the persistent input, saved or not.
             const collectorInput = document.getElementById('collector-input').value.trim().toUpperCase() || "CLK SA";
             
             // Update the system instruction template with dynamic values
@@ -1633,6 +1799,11 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
                 return false;
             }
 
+            // Retrieve UI overrides before processing
+            const isErToggled = document.getElementById('er-toggle').checked;
+            const manualTime = document.getElementById('time-collected-input').value.trim();
+            const collectorOverride = document.getElementById('collector-input').value.trim().toUpperCase();
+
             let formLines = structuredText.split('\n').filter(line => line.trim() !== '');
             const initialCount = formLines.length;
 
@@ -1701,6 +1872,18 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
                     tube_top: parts[13] || '', 
                     requests_list: parts[14] || ''
                 };
+
+                // --- APPLY OVERRIDES ---
+                if (isErToggled) {
+                    form.ward_location = "ER";
+                }
+                // Apply manual time if provided
+                if (manualTime) {
+                    form.time_collected = manualTime;
+                }
+                // Collector is always set by the persistent input
+                form.collected_by = collectorOverride || (form.collected_by || ''); 
+
                 finalFormsArray.push(form);
                 
                 // Skip material/reminder logic for empty lines
@@ -1833,11 +2016,11 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
                         tests: [`Blood CS (Total Forms: ${bcsCount})`] 
                     };
                 } else if (key === 'SPECIMEN CUP') {
-                      // Handle specimen cups as a consolidated item
-                      finalMaterialDetails[key] = {
-                          count: cupCount,
-                          tests: materialDetails[key].tests // Use the individual requests
-                      };
+                     // Handle specimen cups as a consolidated item
+                     finalMaterialDetails[key] = {
+                         count: cupCount,
+                         tests: materialDetails[key].tests // Use the individual requests
+                     };
                 } else if (key !== 'N/A') {
                     // Filter out N/A forms, and pass the individual requests array
                     finalMaterialDetails[key] = {
@@ -2153,6 +2336,31 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
         function generatePDF() {
             window.print();
         }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('load', () => {
+            loadSettings();
+            
+            // 2. Save settings AND trigger refresh on toggle/input change (if structured data is present)
+            const controlsToRefresh = [
+                document.getElementById('er-toggle'),
+                document.getElementById('collector-input'),
+                document.getElementById('time-collected-input')
+            ];
+
+            controlsToRefresh.forEach(control => {
+                control.addEventListener(control.type === 'checkbox' ? 'change' : 'input', () => {
+                    // Only save persistent settings (Collector and ER Toggle)
+                    saveSettings();
+                    
+                    const structuredText = document.getElementById('structured-input').value.trim();
+                    if (structuredText) {
+                        // Use a slight delay to ensure the save operation completes if needed
+                        setTimeout(processRequestAndShowPDFButton, 50);
+                    }
+                });
+            });
+        });
 
     </script>
 </body>
