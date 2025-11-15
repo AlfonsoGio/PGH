@@ -60,7 +60,7 @@ body {
     background-color: #ffffff;
     padding-left: 25px;
     padding-right: 25px;
-    padding-bottom: 25px;
+    padding-bottom: 5px;
     border-radius: 20px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Softer, larger shadow */
     margin-bottom: 0px;
@@ -68,6 +68,20 @@ body {
     border-top: 10px solid #0a4627; /* Accent color bar */
     font-size: 25px;
 }
+
+#printable-section {
+    background-color: #ffffff;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-bottom: 5px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Softer, larger shadow */
+    margin-bottom: 0px;
+    position: relative; 
+    border-top: 10px solid #0a4627; /* Accent color bar */
+    font-size: 25px;
+}
+
 /* New container for the form header and PDF button */
 #form-header-container {
     display: flex;
@@ -593,7 +607,7 @@ input:checked + .slider:before {
         padding: 10px; /* Reduced padding for mobile density */
     }
     .input-column {
-        min-width: 50%;
+        max-width: 50%;
         padding: 15px;
     }
 
@@ -663,11 +677,21 @@ input:checked + .slider:before {
     
     /* CRITICAL: Hide the new instruction box and its content for printing */
     #preview-instructions { display: none !important; }
+    #main-nav-bar { display: none !important; }
 
-    
+    /* NEW/MODIFIED RULE: Hide everything in the PRINTABLES tab except the container */
+    #third-tool #input-section { display: none !important; } 
+    #form-tool-content, #second-tool { display: none !important; }
+
+    /* NEW RULE: Make the container the only visible element in the body flow */
+    #printable-area-container { 
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: static !important;
     /* Hide the main nav bar */
 
-    #main-nav-bar { display: none !important; }
+   
 
     body { 
         margin: 0 ; 
@@ -734,15 +758,21 @@ input:checked + .slider:before {
     }
 }
 
+#printable-area-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+
 </style>
 </head>
 <body>
     
 <!-- NEW: Wrapper for H2 and Logo -->
 <nav id="main-nav-bar">
-    <button class="nav-tab active" data-target="form-tool-content">Form Generator</button>
-    <button class="nav-tab" data-target="second-tool">Second Tool Name</button>
-    <button class="nav-tab" data-target="third-tool">Third Tool Name</button>
+    <button class="nav-tab active" data-target="form-tool-content">TALONG</button>
+    <button class="nav-tab" data-target="second-tool">MANI</button>
+    <button class="nav-tab" data-target="third-tool">PRINTABLES</button>
 </nav>
 
 <!-- FIRST TAB: FORM GENERATOR -->
@@ -866,15 +896,52 @@ Time 11:30 am today.
     </div>
 </div>
 <div id="second-tool" class="tool-content">
+    
     <div id="input-section">
-    <h2>Coming Soon..</h2>
-    </div>
+  <div id="title-logo-wrapper">
+                <img id="logo-image" src="logo.png" alt="PGH Logo">
+            <h2><span style="color: #007bff; margin-left:10px"></span>Monitoring Assistance and Normalization Inputs</h2>
+        </div>
+      </div>
     </div>
 <div id="third-tool" class="tool-content">
     <div id="input-section">
-    <h2>Coming Soon..</h2>
+        <div id="title-logo-wrapper">
+            <img id="logo-image" src="logo.png" alt="PGH Logo">
+            <h2><span style="color: #007bff; margin-left:10px"></span>Printable Forms Repository</h2>
+        </div>
+        <div id="input-column">
+            <div id="preview-instructions">
+                <p class="instruction-text" style="color: #601717;">
+                <strong>• Use only for emergency: </strong> Procure forms from nurse stations as much as possible
+                 </p>   
+                <p class="instruction-text" style="color: #601717;">
+                <strong>• Select a form below to view a printable PDF preview. Press printer button to print </strong>
+                 </p>
+            </div>
+    
+            <div id="printables-button-container" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
+                <button onclick="togglePrintView('lrf')">Laboratory Request Form (4s for A4)</button>
+                <button onclick="togglePrintView('slrf')">Laboratory Request Form (1s for A6)</button>
+                <button onclick="togglePrintView('ef')">Equilife Form</button>
+                <button onclick="togglePrintView('rivf')">RIV Form</button>
+                <button onclick="togglePrintView('soon1')">Soon</button>
+                <button onclick="togglePrintView('soon2')">Soon</button>
+                <button onclick="togglePrintView('soon3')">Soon</button>
+                <button onclick="togglePrintView('soon4')">Soon</button>
+             </div>
+        </div>
+    
+        <div id="input-column">
+            <div id="printable-area-container" style="display: none;">
+                <button style="font-size: 10pt; height: 30px; width: 300px;position: fixed; right: 3vw; background-color: #cc0000; margin-top: 50px; padding-top: 6px">
+                  Use printer button to print (NOT Ctrl+P)
+                </button>
+                <iframe id="printable-iframe" style="width: 100%; height: 50vh; "></iframe>
+            </div>
+        </div>
     </div>
-    </div>
+</div>  
 <script>
         // --- GEMINI API CONFIGURATION ---
 
@@ -1307,6 +1374,7 @@ GeneXpert|ETA|N/A|Special`;
 
             localStorage.setItem('pgh_collector_name', collector);
             localStorage.setItem('pgh_er_override', isEr);
+
         }
 
         /**
@@ -2493,25 +2561,29 @@ GeneXpert|ETA|N/A|Special`;
             const clickedButton = document.querySelector(`.nav-tab[data-target="${targetId}"]`);
             if (clickedButton) {
                 clickedButton.classList.add('active');
+
+            // 5. SAVE the active tab ID to localStorage
+            localStorage.setItem('pgh_last_active_tab', targetId);
             }
         }
         
-        // --- INITIALIZATION ---
+        // --- INITIALIZATION (UPDATED) ---
         window.addEventListener('load', () => {
             loadSettings();
             
-            // 1. Set up tab switching listeners
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const targetId = e.target.getAttribute('data-target');
-                    if (targetId) {
-                        switchToolContent(targetId);
-                    }
-                });
-            });
+            // 1. Set up tab switching listeners
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const targetId = e.target.getAttribute('data-target');
+                    if (targetId) {
+                        switchToolContent(targetId);
+                    }
+                });
+            });
 
-            // CRITICAL FIX: Ensure the main forms tab is the one visible on load
-            switchToolContent('form-tool-content');
+            // CRITICAL FIX: Load the last active tab on page load
+            const lastActiveTab = localStorage.getItem('pgh_last_active_tab') || 'form-tool-content';
+            switchToolContent(lastActiveTab);
 
             // 2. Save settings AND trigger refresh on toggle/input change (if structured data is present)
             const controlsToRefresh = [
@@ -2533,6 +2605,77 @@ GeneXpert|ETA|N/A|Special`;
                 });
             });
         });
+
+// --- PRINTABLES TAB LOGIC ---
+
+/**
+ * Toggles the full-screen printable view for a specific form.
+ * @param {string} formKey The key for the form (e.g., 'lrf', 'cf', 'sf').
+ */
+function togglePrintView(formKey) {
+    const body = document.body;
+    const iframe = document.getElementById('printable-iframe');
+    const container = document.getElementById('printable-area-container');
+
+    // 1. Determine the path for the printable PDF/HTML
+    let filePath;
+    switch(formKey) {
+        case 'lrf':
+            // Since LRF is the main form, we can reuse the existing LRF HTML structure 
+            // from the first tab and clone it into the iframe, or just use a placeholder.
+            // For simplicity, we'll use a placeholder image for LRF and actual PDF/HTML for others.
+            // Assuming you have image/pdf files named 'lrf_printable.png', 'cf.pdf', etc.
+            filePath = 'lrf.pdf'; 
+            break;
+        case 'slrf':
+            filePath = 'slrf.pdf';
+            break;
+        case 'ef':
+            filePath = 'ef.pdf';
+            break;
+        case 'rivf':
+            filePath = 'rivf.pdf';
+            break;
+        case 'soon1':
+            filePath = 'back_of_form.png';
+            break;
+        case 'soon2':
+            filePath = 'back_of_form.png';
+            break;
+        case 'soon3':
+            filePath = 'back_of_form.png';
+            break;
+        case 'soon4':
+            filePath = 'back_of_form.png';
+            break;
+        default:
+            return;
+    }
+    
+    // 2. Set the iframe source and switch to the full-screen view
+    iframe.src = filePath;
+    body.classList.add('print-view-active');
+    container.style.display = 'block';
+
+    // IMPORTANT: When hosting PDF, the browser often controls the print behavior.
+    // For HTML/PNG, you can trigger print after a delay.
+    // window.print() will use the new print styles for body.print-view-active
+    // We do NOT call window.print() automatically here as the user requested to press Ctrl+P.
+}
+
+/**
+ * Closes the full-screen printable view and returns to the main tool page.
+ */
+function closePrintView() {
+    const body = document.body;
+    const iframe = document.getElementById('printable-iframe');
+    const container = document.getElementById('printable-area-container');
+    
+    body.classList.remove('print-view-active');
+    container.style.display = 'none';
+    iframe.src = ''; // Clear the iframe content to stop loading
+}
+
     </script>
 </body>
 </html>
